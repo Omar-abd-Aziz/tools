@@ -46,9 +46,49 @@ const tool = urlParams.get('tool');
 
 if(tool!==null){
     let ToolObject=AllToolsObject.find(e => e.ToolName == `${tool}`);
-    console.log(AllToolsObject.find(e => e.ToolName == `${tool}`));
     document.querySelector(".iframe").src=ToolObject.ToolLink;
 };
 /* *********************************************************************************************************** */
 /* End Get Tool Name From The Url */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Start Full Screen Btn */
+/* *********************************************************************************************************** */
+var elem = document.querySelector(".iframe");
+function openFullscreen() {
+  if (elem.requestFullscreen) {
+    elem.requestFullscreen();
+  } else if (elem.webkitRequestFullscreen) { /* Safari */
+    elem.webkitRequestFullscreen();
+  } else if (elem.msRequestFullscreen) { /* IE11 */
+    elem.msRequestFullscreen();
+  }
+}
+
+console.log(document.querySelector(".btnFillScreen"))
+document.querySelector(".btnFillScreen").addEventListener("click",(e)=>{
+    openFullscreen();
+})
+/* *********************************************************************************************************** */
+/* End Full Screen Btn */
+
+
+
+
+
+
+
+
 
