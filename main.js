@@ -11,8 +11,11 @@ let AllToolsObject = [{
     ToolName: "Notes",
     ToolLink: "https://omar-abd-aziz.github.io/Notes/",
 },{
-    ToolName: "Max-Eg",
-    ToolLink: "https://omar-abd-aziz.github.io/Max-Eg/index.html",
+    ToolName: "Notes-Online",
+    ToolLink: "https://omar-abd-aziz.github.io/Notes-Online/index.html",
+},{
+  ToolName: "Max-Eg",
+  ToolLink: "https://omar-abd-aziz.github.io/Max-Eg/index.html",
 }]
 /* *********************************************************************************************************** */
 /* End Create AllToolsObject */
