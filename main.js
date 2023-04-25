@@ -20,7 +20,7 @@ let AllToolsObject = [{
   ToolName: "Css-Bg-Gradians",
   ToolLink: "https://www.gradientmagic.com/browse",
 },{
-  ToolName: "CSS Section Separator Generator",
+  ToolName: "CSS Sections",
   ToolLink: "https://wweb.dev/resources/css-separator-generator",
 }]
 /* *********************************************************************************************************** */
