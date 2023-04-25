@@ -16,6 +16,12 @@ let AllToolsObject = [{
 },{
   ToolName: "Max-Eg",
   ToolLink: "https://omar-abd-aziz.github.io/Max-Eg/index.html",
+},{
+  ToolName: "Css-Bg-Gradians",
+  ToolLink: "https://www.gradientmagic.com/browse",
+},{
+  ToolName: "CSS Section Separator Generator",
+  ToolLink: "https://wweb.dev/resources/css-separator-generator",
 }]
 /* *********************************************************************************************************** */
 /* End Create AllToolsObject */
