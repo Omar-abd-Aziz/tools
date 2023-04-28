@@ -56,6 +56,7 @@ const tool = urlParams.get('tool');
 if(tool!==null){
     let ToolObject=AllToolsObject.find(e => e.ToolName == `${tool}`);
     document.querySelector(".iframe").src=ToolObject.ToolLink;
+    document.title=ToolObject.ToolName;
 };
 /* *********************************************************************************************************** */
 /* End Get Tool Name From The Url */
