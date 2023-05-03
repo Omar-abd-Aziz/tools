@@ -3,7 +3,7 @@
 /* *********************************************************************************************************** */
 let AllToolsObject = [{
     ToolName: "Video-Downloader",
-    ToolLink: "https://omar-abd-aziz.github.io/YT-Downloader/",
+    ToolLink: "https://www.y2mate.com/en561",
 },{
     ToolName: "Short-Link",
     ToolLink: "https://omar-abd-aziz.github.io/Short-Link/",
