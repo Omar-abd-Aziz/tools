@@ -9,7 +9,7 @@ let AllToolsObject = [{
     ToolLink: "https://omar-abd-aziz.github.io/Short-Link/",
 },{
     ToolName: "File-Upload",
-    ToolLink: "https://omar-abd-aziz.github.io/File-Upload-By-Elhalwany/",
+    ToolLink: "https://omar-abd-aziz.github.io/File-Uploaded-By-Elhalwany/",
 },{
     ToolName: "Notes",
     ToolLink: "https://omar-abd-aziz.github.io/Notes/",
