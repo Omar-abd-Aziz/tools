@@ -25,6 +25,9 @@ let AllToolsObject = [{
 },{
   ToolName: "CSS Sections",
   ToolLink: "https://wweb.dev/resources/css-separator-generator",
+},{
+  ToolName: "CSS Box Shadow",
+  ToolLink: "https://getcssscan.com/css-box-shadow-examples",
 }]
 /* *********************************************************************************************************** */
 /* End Create AllToolsObject */
