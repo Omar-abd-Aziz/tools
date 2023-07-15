@@ -2,8 +2,8 @@
 /* Start Create AllToolsObject */
 /* *********************************************************************************************************** */
 let AllToolsObject = [{
-    ToolName: "Facebook-Video-Downloader",
-    ToolLink: "https://fdownload.app/en",
+    ToolName: "Video-Downloader",
+    ToolLink: "https://ummy.net",
 },{
     ToolName: "Short-Link",
     ToolLink: "https://omar-abd-aziz.github.io/Short-Link/",
