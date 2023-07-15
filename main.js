@@ -2,8 +2,8 @@
 /* Start Create AllToolsObject */
 /* *********************************************************************************************************** */
 let AllToolsObject = [{
-    ToolName: "Video-Downloader",
-    ToolLink: "https://www.y2mate.com/en690",
+    ToolName: "Facebook-Video-Downloader",
+    ToolLink: "https://fdownload.app/en",
 },{
     ToolName: "Short-Link",
     ToolLink: "https://omar-abd-aziz.github.io/Short-Link/",
