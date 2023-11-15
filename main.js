@@ -2,8 +2,8 @@
 /* Start Create AllToolsObject */
 /* *********************************************************************************************************** */
 let AllToolsObject = [{
-    ToolName: "Video-Downloader",
-    ToolLink: "https://ummy.net",
+    ToolName: "easy-pay-tax",
+    ToolLink: "http://easy-pay-tax.great-site.net/",
 },{
     ToolName: "Short-Link",
     ToolLink: "https://omar-abd-aziz.github.io/Short-Link/",
@@ -103,7 +103,6 @@ document.querySelector(".btnFillScreen").addEventListener("click",(e)=>{
 })
 /* *********************************************************************************************************** */
 /* End Full Screen Btn */
-
 
 
 
