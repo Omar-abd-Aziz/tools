@@ -3,7 +3,7 @@
 /* *********************************************************************************************************** */
 let AllToolsObject = [{
     ToolName: "easy-pay-tax",
-    ToolLink: "http://easy-pay-tax.great-site.net/",
+    ToolLink: "https://easy-pay-tax.great-site.net/",
 },{
     ToolName: "Short-Link",
     ToolLink: "https://omar-abd-aziz.github.io/Short-Link/",
