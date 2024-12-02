@@ -31,6 +31,9 @@ let AllToolsObject = [{
 },{
   ToolName: "Web To Apk",
   ToolLink: "https://volt.build/upload/",
+},{
+  ToolName: "Fancy-Border-Radius",
+  ToolLink: "https://9elements.github.io/fancy-border-radius/#89.100.22.81--.",
 },
 ]
 /* *********************************************************************************************************** */
