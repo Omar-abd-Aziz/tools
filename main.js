@@ -30,6 +30,14 @@ let AllToolsObject = [{
     ToolLink: "https://examzone.infinityfreeapp.com/dashboard.html?i=1",
 },
 {
+    ToolName: "Elhalwany-Site",
+    ToolLink: "https://elhalwany.infinityfreeapp.com/Dashboard-Accepted.html",
+},
+{
+    ToolName: "Omar-Portfolio-Site",
+    ToolLink: "https://menu.infinityfreeapp.com/?store=346682332&i=2",
+},
+{
     ToolName: "Notes",
     ToolLink: "https://omar-abd-aziz.github.io/Notes/",
 },
