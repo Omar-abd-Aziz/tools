@@ -6,6 +6,10 @@ let AllToolsObject = [{
     ToolLink: "https://firebasestorage.googleapis.com/v0/b/file-upload-d8004.appspot.com/o/1748282230323-Pdf%20Ai%20v005.html?alt=media&token=fd379ddc-3183-492e-b116-193a74252e05",
 },
 {
+    ToolName: "Pages-With-Ai",
+    ToolLink: "https://firebasestorage.googleapis.com/v0/b/file-upload-d8004.appspot.com/o/1747852089263-Ai%20Deepseak%20V001.html?alt=media&token=6d813bf5-f56b-43ec-afd0-2b418ab51ddb",
+},
+{
     ToolName: "Short-Link",
     ToolLink: "https://omar-abd-aziz.github.io/Short-Link/",
 },
