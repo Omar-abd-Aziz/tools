@@ -2,8 +2,8 @@
 /* Start Create AllToolsObject */
 /* *********************************************************************************************************** */
 let AllToolsObject = [{
-    ToolName: "easy-pay-tax",
-    ToolLink: "https://omar-abd-aziz.github.io/easy-pay/",
+    ToolName: "PDF-Ai",
+    ToolLink: "https://firebasestorage.googleapis.com/v0/b/file-upload-d8004.appspot.com/o/1748282230323-Pdf%20Ai%20v005.html?alt=media&token=fd379ddc-3183-492e-b116-193a74252e05",
 },
 {
     ToolName: "Short-Link",
