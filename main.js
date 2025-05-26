@@ -18,12 +18,16 @@ let AllToolsObject = [{
     ToolLink: "https://omar-abd-aziz.github.io/File-Uploaded-By-Elhalwany/",
 },
 {
-    ToolName: "مصفوفة الأولويات - الأشياء الأولى أولاً",
+    ToolName: "مصفوفة الأولويات - Notes",
     ToolLink: "https://firebasestorage.googleapis.com/v0/b/pagebuilder-6d4aa.appspot.com/o/webpage_1748290486114.html?alt=media&token=00cb1395-7b90-41f0-977b-111425af251a",
 },
 {
     ToolName: "نظام نقاط البيع",
     ToolLink: "https://firebasestorage.googleapis.com/v0/b/pagebuilder-6d4aa.appspot.com/o/webpage_1748291406035.html?alt=media&token=2a5b7336-e458-416e-8122-815569cebfb3",
+},
+{
+    ToolName: "Exam-Zone-Make-Exam-With-Ai",
+    ToolLink: "https://examzone.infinityfreeapp.com/dashboard.html?i=1",
 },
 {
     ToolName: "Notes",
