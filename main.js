@@ -10,7 +10,7 @@ let AllToolsObject = [{
     ToolLink: "https://omar-abd-aziz.github.io/Short-Link/",
 },
 {
-    ToolName: "Qe-Code-Genrator",
+    ToolName: "QR-Code-Genrator",
     ToolLink: "https://firebasestorage.googleapis.com/v0/b/pagebuilder-6d4aa.appspot.com/o/webpage_1747395160170.html?alt=media&token=b2785ca5-2c9e-455a-944c-9a63dad950e3",
 },
 {
