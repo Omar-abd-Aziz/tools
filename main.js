@@ -26,6 +26,10 @@ let AllToolsObject = [{
     ToolLink: "https://firebasestorage.googleapis.com/v0/b/pagebuilder-6d4aa.appspot.com/o/webpage_1748371999793.html?alt=media&token=ded3f5e6-9217-423a-a533-e37e6442d7ca",
 },
 {
+    ToolName: "مصفوفة الأولويات - Dashboard",
+    ToolLink: "https://firebasestorage.googleapis.com/v0/b/pagebuilder-6d4aa.appspot.com/o/webpage_1748376941779.html?alt=media&token=26e093af-86c3-4bf7-a93a-64d4edb3670f",
+},
+{
     ToolName: "نظام نقاط البيع",
     ToolLink: "https://firebasestorage.googleapis.com/v0/b/pagebuilder-6d4aa.appspot.com/o/webpage_1748291406035.html?alt=media&token=2a5b7336-e458-416e-8122-815569cebfb3",
 },
