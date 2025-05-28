@@ -22,11 +22,11 @@ let AllToolsObject = [{
     ToolLink: "https://omar-abd-aziz.github.io/File-Uploaded-By-Elhalwany/",
 },
 {
-    ToolName: "Notes-First-Things-first",
+    ToolName: "Notes-First-Things-First",
     ToolLink: "https://firebasestorage.googleapis.com/v0/b/pagebuilder-6d4aa.appspot.com/o/webpage_1748434381941.html?alt=media&token=bf88b128-1d88-4f9a-be5c-8fc1703a6624",
 },
 {
-    ToolName: "مصفوفة الأولويات - Dashboard",
+    ToolName: "Notes-First-Things-First-Dashboard",
     ToolLink: "https://firebasestorage.googleapis.com/v0/b/pagebuilder-6d4aa.appspot.com/o/webpage_1748376941779.html?alt=media&token=26e093af-86c3-4bf7-a93a-64d4edb3670f",
 },
 {
