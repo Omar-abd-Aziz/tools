@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Vendor Portfolio</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-storage-compat.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding-top: 70px; /* For fixed navbar */
+            font-family: 'Inter', sans-serif; /* Added Inter font */
+        }
+        .navbar {
+            box-shadow: 0 2px 4px rgba(0,0,0,.1);
+        }
+        .main-content {
+            min-height: calc(100vh - 120px);
+        }
+        .card {
+            transition: transform .2s ease-in-out, box-shadow .2s ease-in-out;
+            border-radius: 0.5rem; /* Rounded corners for cards */
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,.15);
+        }
+        .profile-img-sm {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .profile-img-md { /* Used in dashboard profile */
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 0 auto 1rem auto;
+            display: block;
+            border: 3px solid #dee2e6;
+        }
+        .profile-img-lg { /* For single portfolio view */
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 1rem;
+            border: 4px solid #fff;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .project-img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-top-left-radius: 0.5rem;
+            border-top-right-radius: 0.5rem;
+        }
+        .tag {
+            display: inline-block;
+            padding: .3em .7em; /* Slightly larger padding */
+            font-size: 80%;   /* Slightly larger font */
+            font-weight: 600; /* Semi-bold */
+            line-height: 1;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: baseline;
+            border-radius: .3rem; /* More rounded tags */
+            margin-right: .4rem;
+            margin-bottom: .4rem;
+        }
+        .loader {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--bs-primary);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .filter-controls {
+            background-color: #ffffff; /* White background for filter */
+            padding: 1.5rem; /* More padding */
+            border-radius: .75rem; /* More rounded */
+            margin-bottom: 2rem; /* More margin */
+            box-shadow: 0 2px 10px rgba(0,0,0,.075);
+        }
+        .dashboard-card {
+            margin-bottom: 1.5rem;
+        }
+        .form-label {
+            font-weight: 500;
+        }
+        .btn-google {
+            background-color: #DB4437;
+            color: white;
+        }
+        .btn-google:hover {
+            background-color: #c33124;
+            color: white;
+        }
+        .image-preview {
+            max-width: 150px;
+            max-height: 150px;
+            object-fit: cover;
+            border-radius: 0.25rem;
+        }
+        .profile-image-preview {
+             max-width: 120px;
+             max-height: 120px;
+             border-radius: 50%;
+             object-fit: cover;
+        }
+        /* Styles for Single Portfolio View */
+        #singlePortfolioDetailView .profile-header {
+            background: linear-gradient(to right, #007bff, #0056b3);
+            color: white;
+            padding: 2rem 1rem;
+            border-radius: 0.75rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        #singlePortfolioDetailView .contact-info p { margin-bottom: 0.5rem; }
+        #singlePortfolioDetailView .contact-info i { margin-right: 0.75rem; width: 20px; text-align: center;}
+        #singlePortfolioDetailView .projects-grid .card { margin-bottom: 1.5rem; }
+        .btn-rounded { border-radius: 50px; padding: 0.5rem 1.5rem;}
+        .back-to-portfolios-btn {
+            margin-bottom: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-white fixed-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="#" id="homeBrandLink">
+                <i class="fas fa-briefcase me-2"></i>PortfolioHub
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#" id="publicViewNav">Public Portfolios</a>
+                    </li>
+                    <li class="nav-item" id="dashboardNav" style="display: none;">
+                        <a class="nav-link" href="#" id="dashboardViewNav">My Dashboard</a>
+                    </li>
+                </ul>
+                <div id="authContainer" class="d-flex align-items-center">
+                    </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mt-5 pt-3 main-content">
+        <section id="loginPageView" class="text-center" style="display: none;">
+            <div class="row justify-content-center">
+                <div class="col-md-6 col-lg-5">
+                    <div class="card p-4 shadow-sm">
+                        <h2 class="mb-4 fw-bold">Welcome to PortfolioHub</h2>
+                        <p class="lead mb-4 text-muted">Showcase your work and discover amazing talents.</p>
+                        <button id="googleSignInBtn" class="btn btn-google btn-lg w-100">
+                            <i class="fab fa-google me-2"></i>Sign in with Google
+                        </button>
+                        <div class="loader mt-3" id="authLoader" style="display: none;"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="publicPortfoliosView" style="display: none;">
+            <h2 class="mb-4 text-center fw-bold">Discover Portfolios</h2>
+            <div class="filter-controls row g-3 mb-4 align-items-center">
+                <div class="col-md-5">
+                    <input type="text" class="form-control form-control-lg" id="keywordSearchInput" placeholder="Search by name, skill, project...">
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select form-select-lg" id="skillFilterSelect">
+                        <option value="">Filter by Skill/Tech</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select form-select-lg" id="vendorFilterSelect">
+                        <option value="">Filter by Vendor</option>
+                    </select>
+                </div>
+                <div class="col-md-1 d-grid">
+                    <button class="btn btn-outline-secondary btn-lg" id="clearFiltersBtn" title="Clear Filters"><i class="fas fa-times"></i></button>
+                </div>
+            </div>
+            <div class="loader" id="publicLoader" style="display: none;"></div>
+            <div id="publicPortfolioGrid" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                </div>
+            <p id="noPublicResults" class="text-center fs-5 mt-4" style="display: none;">No portfolios found matching your criteria.</p>
+        </section>
+
+        <section id="dashboardView" style="display: none;">
+            <h2 class="mb-4" id="dashboardTitle">My Dashboard</h2>
+            <div class="row">
+                <div class="col-lg-4 dashboard-card">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h4 class="card-title text-primary">My Profile</h4>
+                            <div id="profileDisplayArea">
+                                </div>
+                            <button class="btn btn-primary mt-3 w-100 btn-rounded" id="editProfileBtn" data-bs-toggle="modal" data-bs-target="#profileModal">
+                                <i class="fas fa-edit me-2"></i>Edit Profile
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-8 dashboard-card">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h4 class="card-title mb-0 text-primary">My Projects</h4>
+                                <button class="btn btn-success btn-rounded" id="addProjectBtn" data-bs-toggle="modal" data-bs-target="#projectModal">
+                                    <i class="fas fa-plus me-2"></i>Add Project
+                                </button>
+                            </div>
+                            <div class="loader" id="dashboardProjectsLoader" style="display: none;"></div>
+                            <div id="dashboardProjectsGrid" class="row row-cols-1 row-cols-md-2 g-4">
+                                </div>
+                             <p id="noDashboardProjects" class="text-center fs-5 mt-3" style="display: none;">You haven't added any projects yet. Click "Add Project" to start!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-4" id="analyticsSection" style="display: none;">
+                <div class="col-12 dashboard-card">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h4 class="card-title text-primary">Project Analytics</h4>
+                            <div style="height: 350px; margin: auto;"> {/* Set fixed height for chart container */}
+                                 <canvas id="techChart"></canvas>
+                            </div>
+                            <p id="noChartData" class="text-center fs-5 mt-3" style="display: none;">Not enough project data to display charts.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="singlePortfolioDetailView" style="display: none;">
+            <div class="text-center">
+                 <button class="btn btn-outline-secondary back-to-portfolios-btn btn-rounded" id="backToAllBtn"><i class="fas fa-arrow-left me-2"></i>Back to All Portfolios</button>
+            </div>
+            <div id="singleProfileData" class="mb-5">
+                </div>
+            <h3 class="mb-4 text-center fw-bold" id="singlePortfolioProjectsTitle">Projects</h3>
+            <div class="loader" id="singlePortfolioProjectsLoader" style="display: none;"></div>
+            <div id="singlePortfolioProjectsGrid" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                </div>
+            <p id="noSingleUserProjects" class="text-center fs-5 mt-4" style="display: none;">This user hasn't added any projects yet.</p>
+        </section>
+    </main>
+
+    <footer class="bg-light text-center text-lg-start mt-auto py-3 border-top">
+        <div class="text-center p-3 text-muted">
+            © <span id="currentYear"></span> PortfolioHub by AI
+        </div>
+    </footer>
+
+    <div class="modal fade" id="profileModal" tabindex="-1" aria-labelledby="profileModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="profileModalLabel">Edit Profile</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="profileForm">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="profileFullName" class="form-label">Full Name</label>
+                                <input type="text" class="form-control" id="profileFullName" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="profileJobTitle" class="form-label">Job Title / Role</label>
+                                <input type="text" class="form-control" id="profileJobTitle">
+                            </div>
+                        </div>
+                        <input type="hidden" id="profilePhotoURL">
+                        <div class="mb-3">
+                            <label for="profilePhotoFile" class="form-label">Profile Photo</label>
+                            <input type="file" class="form-control" id="profilePhotoFile" accept="image/*">
+                            <small class="form-text text-muted">Upload a new photo to change it. Recommended: Square aspect ratio.</small>
+                            <div id="profilePhotoPreviewContainer" class="mt-2" style="display:none;">
+                                <img id="profilePhotoPreview" src="#" alt="Profile Preview" class="profile-image-preview">
+                                <button type="button" class="btn btn-sm btn-outline-danger ms-2" id="removeProfilePhotoBtn">Remove</button>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="profileBio" class="form-label">Short Bio / About Me</label>
+                            <textarea class="form-control" id="profileBio" rows="3"></textarea>
+                        </div>
+                         <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="profileContactEmail" class="form-label">Contact Email</label>
+                                <input type="email" class="form-control" id="profileContactEmail" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="profileLocation" class="form-label">Location (e.g., City, Country)</label>
+                                <input type="text" class="form-control" id="profileLocation">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="profileWhatsapp" class="form-label">WhatsApp (e.g., +1234567890)</label>
+                                <input type="tel" class="form-control" id="profileWhatsapp">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="profileTelegram" class="form-label">Telegram (e.g., @username)</label>
+                                <input type="text" class="form-control" id="profileTelegram">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="profileSkills" class="form-label">Skills (comma-separated)</label>
+                            <input type="text" class="form-control" id="profileSkills" placeholder="e.g., HTML, CSS, JavaScript, Firebase">
+                        </div>
+                        <div class="mb-3">
+                            <label for="profileLanguages" class="form-label">Languages Spoken (comma-separated)</label>
+                            <input type="text" class="form-control" id="profileLanguages" placeholder="e.g., English, Arabic">
+                        </div>
+                        <div class="mb-3">
+                            <label for="profileResumeURL" class="form-label">Resume URL (link to PDF on Drive, Dropbox, etc.)</label>
+                            <input type="url" class="form-control" id="profileResumeURL">
+                        </div>
+                         <div class="mb-3">
+                            <label for="profileSocialLinks" class="form-label">Social/Portfolio Links (comma-separated URLs)</label>
+                            <input type="text" class="form-control" id="profileSocialLinks" placeholder="e.g., https://linkedin.com/in/..., https://github.com/...">
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Save Profile</button>
+                        </div>
+                         <div class="loader mt-3" id="profileFormLoader" style="display: none;"></div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="projectModal" tabindex="-1" aria-labelledby="projectModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="projectModalLabel">Add Project</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="projectForm">
+                        <input type="hidden" id="projectIdHidden">
+                        <div class="mb-3">
+                            <label for="projectTitle" class="form-label">Title</label>
+                            <input type="text" class="form-control" id="projectTitle" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="projectDescription" class="form-label">Description</label>
+                            <textarea class="form-control" id="projectDescription" rows="3" required></textarea>
+                        </div>
+                        <input type="hidden" id="projectImageURL">
+                        <div class="mb-3">
+                            <label for="projectImageFile" class="form-label">Project Image</label>
+                            <input type="file" class="form-control" id="projectImageFile" accept="image/*">
+                            <small class="form-text text-muted">Upload an image for the project.</small>
+                             <div id="projectImagePreviewContainer" class="mt-2" style="display:none;">
+                                <img id="projectImagePreview" src="#" alt="Project Preview" class="image-preview">
+                                <button type="button" class="btn btn-sm btn-outline-danger ms-2" id="removeProjectImageBtn">Remove</button>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="projectTags" class="form-label">Tags/Technologies (comma-separated)</label>
+                            <input type="text" class="form-control" id="projectTags" placeholder="e.g., HTML, Firebase, UX" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="projectLink" class="form-label">Project Live Link or GitHub</label>
+                            <input type="url" class="form-control" id="projectLink" required>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Save Project</button>
+                        </div>
+                         <div class="loader mt-3" id="projectFormLoader" style="display: none;"></div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Firebase Configuration
+   // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBpesG-saEPIETt-yYs2A89MjiR49s-Xog",
+            authDomain: "pagebuilder-6d4aa.firebaseapp.com",
+            projectId: "pagebuilder-6d4aa",
+            storageBucket: "pagebuilder-6d4aa.appspot.com", // Ensure this is correct
+            messagingSenderId: "308099195472",
+            appId: "1:308099195472:web:fb7156f0a226a63e22a755",
+        };
+        
+        // --- App ID and Firebase Config (Provided by Canvas Environment) ---
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-portfolio-app'; // Use provided app_id or a default
+        const effectiveFirebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : firebaseConfig;
+
+
+        // Initialize Firebase
+        firebase.initializeApp(effectiveFirebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        const storage = firebase.storage();
+        
+        // Firestore collection paths using app_id
+        const usersCollectionPath = `artifacts/${appId}/public/data/users`; // Publicly readable user profiles
+        const projectsCollectionPath = `artifacts/${appId}/public/data/projects`; // Publicly readable projects
+
+        const usersCollection = db.collection(usersCollectionPath);
+        const projectsCollection = db.collection(projectsCollectionPath);
+
+
+        // --- Global State & DOM Elements ---
+        let currentAuthUser = null; // Renamed from currentUser to avoid conflict with a potential displayedUser
+        let editingProjectId = null;
+        let allUsersCache = [];
+        let allProjectsCache = [];
+        let techChartInstance = null;
+        const profileModalInstance = new bootstrap.Modal(document.getElementById('profileModal'));
+        const projectModalInstance = new bootstrap.Modal(document.getElementById('projectModal'));
+
+        const loginPageView = document.getElementById('loginPageView');
+        const publicPortfoliosView = document.getElementById('publicPortfoliosView');
+        const dashboardView = document.getElementById('dashboardView');
+        const singlePortfolioDetailView = document.getElementById('singlePortfolioDetailView'); // New view
+        const authContainer = document.getElementById('authContainer');
+        const googleSignInBtn = document.getElementById('googleSignInBtn');
+        const authLoader = document.getElementById('authLoader');
+        const publicLoader = document.getElementById('publicLoader');
+        const dashboardProjectsLoader = document.getElementById('dashboardProjectsLoader');
+        const profileFormLoader = document.getElementById('profileFormLoader');
+        const projectFormLoader = document.getElementById('projectFormLoader');
+        const singlePortfolioProjectsLoader = document.getElementById('singlePortfolioProjectsLoader');
+
+        const publicViewNav = document.getElementById('publicViewNav');
+        const dashboardNav = document.getElementById('dashboardNav');
+        const dashboardViewNav = document.getElementById('dashboardViewNav');
+        const homeBrandLink = document.getElementById('homeBrandLink');
+
+        const profileDisplayArea = document.getElementById('profileDisplayArea');
+        const profileForm = document.getElementById('profileForm');
+        const projectForm = document.getElementById('projectForm');
+        const dashboardProjectsGrid = document.getElementById('dashboardProjectsGrid');
+        const publicPortfolioGrid = document.getElementById('publicPortfolioGrid');
+        const dashboardTitle = document.getElementById('dashboardTitle');
+
+        const keywordSearchInput = document.getElementById('keywordSearchInput');
+        const skillFilterSelect = document.getElementById('skillFilterSelect');
+        const vendorFilterSelect = document.getElementById('vendorFilterSelect');
+        const clearFiltersBtn = document.getElementById('clearFiltersBtn');
+        const noPublicResults = document.getElementById('noPublicResults');
+        const noDashboardProjects = document.getElementById('noDashboardProjects');
+
+        const analyticsSection = document.getElementById('analyticsSection');
+        const techChartCanvas = document.getElementById('techChart').getContext('2d');
+        const noChartData = document.getElementById('noChartData');
+
+        const profilePhotoURLInput = document.getElementById('profilePhotoURL');
+        const profilePhotoFileInput = document.getElementById('profilePhotoFile');
+        const profilePhotoPreviewContainer = document.getElementById('profilePhotoPreviewContainer');
+        const profilePhotoPreview = document.getElementById('profilePhotoPreview');
+        const removeProfilePhotoBtn = document.getElementById('removeProfilePhotoBtn');
+
+        const projectImageURLInput = document.getElementById('projectImageURL');
+        const projectImageFileInput = document.getElementById('projectImageFile');
+        const projectImagePreviewContainer = document.getElementById('projectImagePreviewContainer');
+        const projectImagePreview = document.getElementById('projectImagePreview');
+        const removeProjectImageBtn = document.getElementById('removeProjectImageBtn');
+
+        // Single Portfolio View Elements
+        const singleProfileDataContainer = document.getElementById('singleProfileData');
+        const singlePortfolioProjectsGrid = document.getElementById('singlePortfolioProjectsGrid');
+        const noSingleUserProjectsMessage = document.getElementById('noSingleUserProjects');
+        const backToAllBtn = document.getElementById('backToAllBtn');
+        const singlePortfolioProjectsTitle = document.getElementById('singlePortfolioProjectsTitle');
+
+
+        // --- Utility Functions ---
+        function showLoader(loaderElement) { if(loaderElement) loaderElement.style.display = 'block'; }
+        function hideLoader(loaderElement) { if(loaderElement) loaderElement.style.display = 'none'; }
+        function escapeHtml(unsafe) {
+            if (typeof unsafe !== 'string') return unsafe === null || unsafe === undefined ? '' : String(unsafe) ;
+            return unsafe
+                 .replace(/&/g, "&amp;")
+                 .replace(/</g, "&lt;")
+                 .replace(/>/g, "&gt;")
+                 .replace(/"/g, "&quot;")
+                 .replace(/'/g, "&#039;");
+        }
+        function formatTags(tagsArray, colorClass = 'bg-secondary', small = false) {
+            if (!tagsArray || tagsArray.length === 0) return small ? '<span class="small text-muted">N/A</span>' : 'N/A';
+            return tagsArray.map(tag => `<span class="tag ${colorClass} text-white ${small ? 'small' : ''}">${escapeHtml(tag)}</span>`).join(' ');
+        }
+        function getSocialIcon(url) {
+            if (url.includes('linkedin.com')) return 'fab fa-linkedin';
+            if (url.includes('github.com')) return 'fab fa-github';
+            if (url.includes('twitter.com') || url.includes('x.com')) return 'fab fa-twitter'; // Or fa-x-twitter
+            if (url.includes('facebook.com')) return 'fab fa-facebook';
+            if (url.includes('instagram.com')) return 'fab fa-instagram';
+            if (url.includes('behance.net')) return 'fab fa-behance';
+            if (url.includes('dribbble.com')) return 'fab fa-dribbble';
+            return 'fas fa-link'; // Default icon
+        }
+
+
+        // --- Image Upload Utility ---
+        async function uploadImageToFirebase(file, basePath) {
+            if (!file || !currentAuthUser) {
+                console.log("No file or user for upload.");
+                return null;
+            }
+            const uniqueFileName = `${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
+             // Use a path structure that includes the app_id for multi-tenancy in storage, if desired, or keep it simpler
+            const filePath = `${basePath}/${currentAuthUser.uid}/${uniqueFileName}`; // Example: profileImages/USER_ID/timestamp_filename.jpg
+            const storageRef = storage.ref(filePath);
+
+            Swal.fire({
+                title: 'Uploading Image...',
+                text: 'Please wait while the image is being uploaded.',
+                allowOutsideClick: false,
+                didOpen: () => { Swal.showLoading(); }
+            });
+
+            try {
+                const snapshot = await storageRef.put(file);
+                const downloadURL = await snapshot.ref.getDownloadURL();
+                Swal.close();
+                return downloadURL;
+            } catch (error) {
+                Swal.close();
+                console.error(`Error uploading file to ${filePath}:`, error);
+                Swal.fire('Upload Error', `Failed to upload image: ${error.message}. Check console and storage rules.`, 'error');
+                throw error; // Re-throw to be caught by caller
+            }
+        }
+
+
+        // --- View Management ---
+        function showView(viewToShowId) {
+            [loginPageView, publicPortfoliosView, dashboardView, singlePortfolioDetailView].forEach(view => {
+                if (view) view.style.display = 'none';
+            });
+            const viewElement = document.getElementById(viewToShowId);
+            if (viewElement) viewElement.style.display = 'block';
+
+            [publicViewNav, dashboardViewNav].forEach(nav => nav.classList.remove('active', 'fw-bold'));
+            if (viewToShowId === 'publicPortfoliosView') publicViewNav.classList.add('active', 'fw-bold');
+            if (viewToShowId === 'dashboardView') dashboardViewNav.classList.add('active', 'fw-bold');
+        }
+        
+        backToAllBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            // Clear the userId from URL and reload or show public view
+            window.history.pushState({}, document.title, window.location.pathname); // Removes query params
+            showView('publicPortfoliosView');
+            if (!allProjectsCache.length) loadPublicPortfolios(); // Reload if cache is empty
+        });
+
+
+        publicViewNav.addEventListener('click', (e) => { e.preventDefault(); window.history.pushState({}, document.title, window.location.pathname); showView('publicPortfoliosView'); if (!allProjectsCache.length && !allUsersCache.length) loadPublicPortfolios(); });
+        dashboardViewNav.addEventListener('click', (e) => { e.preventDefault(); window.history.pushState({}, document.title, window.location.pathname); showView('dashboardView'); });
+        homeBrandLink.addEventListener('click', (e) => { e.preventDefault(); window.history.pushState({}, document.title, window.location.pathname); showView('publicPortfoliosView'); if (!allProjectsCache.length && !allUsersCache.length) loadPublicPortfolios(); });
+
+        // --- Authentication ---
+        auth.onAuthStateChanged(async (user) => {
+            hideLoader(authLoader);
+            const urlParams = new URLSearchParams(window.location.search);
+            const userIdFromUrl = urlParams.get('userId');
+
+            if (userIdFromUrl) { // If a specific user's portfolio is requested via URL
+                await displaySinglePortfolio(userIdFromUrl, user); // Pass current auth user for context if needed
+            } else if (user) { // Standard logged-in flow
+                currentAuthUser = user;
+                authContainer.innerHTML = `
+                    <img src="${escapeHtml(user.photoURL || `https://placehold.co/40x40/EBF4FF/768390?text=${user.displayName ? user.displayName.charAt(0).toUpperCase() : 'U'}`)}" alt="${escapeHtml(user.displayName)}" class="profile-img-sm me-2">
+                    <span class="navbar-text me-3 d-none d-lg-inline">${escapeHtml(user.displayName || user.email)}</span>
+                    <button class="btn btn-outline-danger btn-sm" id="logoutBtn">Logout</button>
+                `;
+                document.getElementById('logoutBtn').addEventListener('click', () => {
+                    auth.signOut().then(() => {
+                        window.history.pushState({}, document.title, window.location.pathname); // Clear query params on logout
+                    });
+                });
+                dashboardNav.style.display = 'block';
+                dashboardTitle.textContent = `Welcome, ${escapeHtml(user.displayName || 'User')}!`;
+
+                await checkAndCreateUserProfile(user); // This uses currentAuthUser
+                showView('dashboardView');
+                loadDashboardData();
+            } else { // Not logged in, and no specific portfolio requested
+                currentAuthUser = null;
+                authContainer.innerHTML = `<button id="loginNavBtn" class="btn btn-primary btn-rounded">Login</button>`;
+                document.getElementById('loginNavBtn').addEventListener('click', () => showView('loginPageView'));
+                dashboardNav.style.display = 'none';
+                showView('loginPageView');
+            }
+        });
+        
+        // Initial check if not handled by onAuthStateChanged (e.g. deep link to public but not logged in)
+        function initializeView() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const userIdFromUrl = urlParams.get('userId');
+
+            if (!userIdFromUrl && !auth.currentUser) {
+                showView('loginPageView'); // Default to login if no URL param and not logged in
+            } else if (!userIdFromUrl && auth.currentUser) {
+                // This case is handled by onAuthStateChanged
+            } else if (userIdFromUrl) {
+                // This case is also handled by onAuthStateChanged, which calls displaySinglePortfolio
+            } else { // Fallback for safety, though likely covered
+                 showView('publicPortfoliosView');
+                 if (!allProjectsCache.length && !allUsersCache.length) loadPublicPortfolios();
+            }
+        }
+
+
+        googleSignInBtn.addEventListener('click', () => {
+            showLoader(authLoader);
+            const provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider)
+                .catch(error => {
+                    hideLoader(authLoader);
+                    console.error("Google Sign-In Error:", error);
+                    Swal.fire('Sign-In Error', error.message, 'error');
+                });
+        });
+
+        async function checkAndCreateUserProfile(authUserForProfile) { // Renamed param
+            if (!authUserForProfile) return;
+            const userRef = usersCollection.doc(authUserForProfile.uid);
+            const doc = await userRef.get();
+            if (!doc.exists) {
+                const newUserProfile = {
+                    uid: authUserForProfile.uid,
+                    name: authUserForProfile.displayName || '',
+                    email: authUserForProfile.email,
+                    photoURL: authUserForProfile.photoURL || '',
+                    jobTitle: '', bio: '', contactEmail: authUserForProfile.email, contact: { whatsapp: '', telegram: '' },
+                    location: '', skills: [], languages: [], resumeURL: '', socialLinks: [],
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                };
+                await userRef.set(newUserProfile);
+                Swal.fire('Welcome!', 'Your profile has been created. Please complete it in the dashboard.', 'success');
+            }
+        }
+
+        // --- Dashboard: Profile Management ---
+        async function loadDashboardData() {
+            if (!currentAuthUser) return;
+            loadUserProfileDisplay();
+            loadUserProjectsForDashboard();
+        }
+
+        async function loadUserProfileDisplay() { // For Dashboard
+            if (!currentAuthUser) return;
+            const doc = await usersCollection.doc(currentAuthUser.uid).get();
+            if (doc.exists) {
+                const data = doc.data();
+                profileDisplayArea.innerHTML = `
+                    <img src="${escapeHtml(data.photoURL || `https://placehold.co/120x120/EBF4FF/768390?text=${data.name ? data.name.charAt(0).toUpperCase() : 'U'}`)}" alt="${escapeHtml(data.name)}" class="profile-img-md mb-3">
+                    <h5 class="text-center">${escapeHtml(data.name) || 'N/A'}</h5>
+                    <p class="text-muted text-center">${escapeHtml(data.jobTitle) || 'No job title'}</p>
+                    <hr>
+                    <p><i class="fas fa-envelope me-2 text-primary"></i>${escapeHtml(data.contactEmail || data.email)}</p>
+                    ${data.location ? `<p><i class="fas fa-map-marker-alt me-2 text-primary"></i>${escapeHtml(data.location)}</p>` : ''}
+                    ${data.contact?.whatsapp ? `<p><i class="fab fa-whatsapp me-2 text-success"></i>${escapeHtml(data.contact.whatsapp)}</p>` : ''}
+                    ${data.contact?.telegram ? `<p><i class="fab fa-telegram me-2 text-info"></i>${escapeHtml(data.contact.telegram)}</p>` : ''}
+                    <p class="mt-2"><strong>Skills:</strong><br>${formatTags(data.skills, 'bg-primary', true)}</p>
+                    ${data.resumeURL ? `<a href="${escapeHtml(data.resumeURL)}" target="_blank" class="btn btn-sm btn-outline-info mt-2 w-100">View Resume</a>` : ''}
+                `;
+                document.getElementById('profileFullName').value = data.name || '';
+                document.getElementById('profileJobTitle').value = data.jobTitle || '';
+                profilePhotoURLInput.value = data.photoURL || '';
+                if (data.photoURL) {
+                    profilePhotoPreview.src = data.photoURL;
+                    profilePhotoPreviewContainer.style.display = 'block';
+                    removeProfilePhotoBtn.style.display = 'inline-block';
+                } else {
+                    profilePhotoPreviewContainer.style.display = 'none';
+                    removeProfilePhotoBtn.style.display = 'none';
+                }
+                profilePhotoFileInput.value = '';
+                document.getElementById('profileBio').value = data.bio || '';
+                document.getElementById('profileContactEmail').value = data.contactEmail || data.email || '';
+                document.getElementById('profileLocation').value = data.location || '';
+                document.getElementById('profileWhatsapp').value = data.contact?.whatsapp || '';
+                document.getElementById('profileTelegram').value = data.contact?.telegram || '';
+                document.getElementById('profileSkills').value = (data.skills || []).join(', ');
+                document.getElementById('profileLanguages').value = (data.languages || []).join(', ');
+                document.getElementById('profileResumeURL').value = data.resumeURL || '';
+                document.getElementById('profileSocialLinks').value = (data.socialLinks || []).join(', ');
+            }
+        }
+        
+        removeProfilePhotoBtn.addEventListener('click', () => {
+            profilePhotoURLInput.value = '';
+            profilePhotoFileInput.value = '';
+            profilePhotoPreview.src = `https://placehold.co/120x120/EBF4FF/768390?text=Upload`;
+            profilePhotoPreviewContainer.style.display = 'block'; // Keep preview area for placeholder
+            removeProfilePhotoBtn.style.display = 'none';
+        });
+        profilePhotoFileInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    profilePhotoPreview.src = e.target.result;
+                    profilePhotoPreviewContainer.style.display = 'block';
+                    removeProfilePhotoBtn.style.display = 'inline-block';
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+
+        profileForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentAuthUser) return;
+            showLoader(profileFormLoader);
+
+            let photoURLToSave = profilePhotoURLInput.value;
+            const photoFile = profilePhotoFileInput.files[0];
+
+            if (photoFile) {
+                try {
+                    // Path for profile images: profileImages/USER_ID/filename
+                    const newPhotoURL = await uploadImageToFirebase(photoFile, `artifacts/${appId}/profileImages`);
+                    if (newPhotoURL) photoURLToSave = newPhotoURL;
+                } catch (error) {
+                    hideLoader(profileFormLoader); return;
+                }
+            }
+
+            const updatedProfile = {
+                name: document.getElementById('profileFullName').value.trim(),
+                jobTitle: document.getElementById('profileJobTitle').value.trim(),
+                photoURL: photoURLToSave,
+                bio: document.getElementById('profileBio').value.trim(),
+                contactEmail: document.getElementById('profileContactEmail').value.trim(),
+                location: document.getElementById('profileLocation').value.trim(),
+                contact: {
+                    whatsapp: document.getElementById('profileWhatsapp').value.trim(),
+                    telegram: document.getElementById('profileTelegram').value.trim()
+                },
+                skills: document.getElementById('profileSkills').value.split(',').map(s => s.trim()).filter(s => s),
+                languages: document.getElementById('profileLanguages').value.split(',').map(s => s.trim()).filter(s => s),
+                resumeURL: document.getElementById('profileResumeURL').value.trim(),
+                socialLinks: document.getElementById('profileSocialLinks').value.split(',').map(s => s.trim()).filter(s => s),
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            try {
+                await usersCollection.doc(currentAuthUser.uid).update(updatedProfile);
+                Swal.fire('Success!', 'Profile updated successfully.', 'success');
+                profileModalInstance.hide();
+                loadUserProfileDisplay();
+                const navPic = authContainer.querySelector('.profile-img-sm');
+                if (navPic && photoURLToSave) navPic.src = photoURLToSave;
+                else if (navPic) navPic.src = `https://placehold.co/40x40/EBF4FF/768390?text=${currentAuthUser.displayName ? currentAuthUser.displayName.charAt(0).toUpperCase() : 'U'}`;
+
+            } catch (error) {
+                console.error("Error updating profile:", error);
+                Swal.fire('Error', `Failed to update profile: ${error.message}`, 'error');
+            } finally {
+                hideLoader(profileFormLoader);
+            }
+        });
+
+        // --- Dashboard: Project Management ---
+        document.getElementById('addProjectBtn').addEventListener('click', () => {
+            document.getElementById('projectModalLabel').textContent = 'Add New Project';
+            projectForm.reset();
+            editingProjectId = null;
+            document.getElementById('projectIdHidden').value = '';
+            projectImageURLInput.value = '';
+            projectImageFileInput.value = '';
+            projectImageFileInput.required = true;
+            projectImagePreview.src = `https://placehold.co/150x150/EBF4FF/768390?text=Upload`;
+            projectImagePreviewContainer.style.display = 'block'; // Show placeholder
+            removeProjectImageBtn.style.display = 'none';
+        });
+        
+        removeProjectImageBtn.addEventListener('click', () => {
+            projectImageURLInput.value = '';
+            projectImageFileInput.value = '';
+            projectImageFileInput.required = !editingProjectId;
+            projectImagePreview.src = `https://placehold.co/150x150/EBF4FF/768390?text=Upload`;
+            projectImagePreviewContainer.style.display = 'block'; // Keep preview for placeholder
+            removeProjectImageBtn.style.display = 'none';
+        });
+        projectImageFileInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    projectImagePreview.src = e.target.result;
+                    projectImagePreviewContainer.style.display = 'block';
+                    removeProjectImageBtn.style.display = 'inline-block';
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+
+        projectForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentAuthUser) return;
+            showLoader(projectFormLoader);
+
+            let imageURLToSave = projectImageURLInput.value;
+            const imageFile = projectImageFileInput.files[0];
+
+            if (imageFile) {
+                try {
+                    // Path for project images: projectImages/USER_ID/filename
+                    const newImageURL = await uploadImageToFirebase(imageFile, `artifacts/${appId}/projectImages`);
+                    if (newImageURL) imageURLToSave = newImageURL;
+                } catch (error) {
+                    hideLoader(projectFormLoader); return;
+                }
+            } else if (!editingProjectId && !imageURLToSave) {
+                Swal.fire('Validation Error', 'Please select an image for the new project.', 'error');
+                hideLoader(projectFormLoader); return;
+            }
+             if (!imageURLToSave && !editingProjectId) {
+                Swal.fire('Validation Error', 'Project image is required for new projects.', 'error');
+                hideLoader(projectFormLoader); return;
+            }
+
+            const projectData = {
+                uid: currentAuthUser.uid, // Make sure this is the authenticated user's UID
+                title: document.getElementById('projectTitle').value.trim(),
+                description: document.getElementById('projectDescription').value.trim(),
+                imageURL: imageURLToSave,
+                tags: document.getElementById('projectTags').value.split(',').map(s => s.trim()).filter(s => s),
+                link: document.getElementById('projectLink').value.trim(),
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            try {
+                if (editingProjectId) {
+                    await projectsCollection.doc(editingProjectId).update(projectData);
+                    Swal.fire('Success!', 'Project updated successfully.', 'success');
+                } else {
+                    projectData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+                    await projectsCollection.add(projectData);
+                    Swal.fire('Success!', 'Project added successfully.', 'success');
+                }
+                projectModalInstance.hide();
+                projectForm.reset();
+                loadUserProjectsForDashboard();
+            } catch (error) {
+                console.error("Error saving project:", error);
+                Swal.fire('Error', `Failed to save project: ${error.message}`, 'error');
+            } finally {
+                hideLoader(projectFormLoader);
+            }
+        });
+
+        async function loadUserProjectsForDashboard() {
+            if (!currentAuthUser) return;
+            showLoader(dashboardProjectsLoader);
+            dashboardProjectsGrid.innerHTML = '';
+            noDashboardProjects.style.display = 'none';
+            analyticsSection.style.display = 'none';
+
+            try {
+                const snapshot = await projectsCollection.where('uid', '==', currentAuthUser.uid)
+                                                       .orderBy('createdAt', 'desc').get();
+                if (snapshot.empty) {
+                    noDashboardProjects.style.display = 'block';
+                    updateDashboardAnalytics([]);
+                    return;
+                }
+                const userProjects = [];
+                snapshot.forEach(doc => {
+                    const project = { id: doc.id, ...doc.data() };
+                    userProjects.push(project);
+                    const card = `
+                        <div class="col">
+                            <div class="card h-100 shadow-sm">
+                                <img src="${escapeHtml(project.imageURL || 'https://placehold.co/300x200/EBF4FF/768390?text=No+Image')}" class="card-img-top project-img" alt="${escapeHtml(project.title)}">
+                                <div class="card-body">
+                                    <h5 class="card-title text-truncate">${escapeHtml(project.title)}</h5>
+                                    <p class="card-text small text-muted" style="min-height: 40px;">${escapeHtml(project.description.substring(0, 70))}${project.description.length > 70 ? '...' : ''}</p>
+                                    <p class="card-text mb-2"><small class="text-muted">Tech: ${formatTags(project.tags, 'bg-info', true)}</small></p>
+                                </div>
+                                <div class="card-footer bg-transparent border-0 p-3 text-end">
+                                    <a href="${escapeHtml(project.link)}" target="_blank" class="btn btn-sm btn-outline-primary me-1"><i class="fas fa-external-link-alt me-1"></i>View</a>
+                                    <button class="btn btn-sm btn-outline-warning me-1 edit-project-btn" data-id="${project.id}"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-outline-danger delete-project-btn" data-id="${project.id}"><i class="fas fa-trash"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    dashboardProjectsGrid.innerHTML += card;
+                });
+                updateProjectActionListeners();
+                updateDashboardAnalytics(userProjects);
+            } catch (error) {
+                console.error("Error loading user projects:", error);
+                dashboardProjectsGrid.innerHTML = '<p class="text-danger text-center">Error loading projects.</p>';
+            } finally {
+                hideLoader(dashboardProjectsLoader);
+            }
+        }
+
+        function updateProjectActionListeners() {
+            document.querySelectorAll('.edit-project-btn').forEach(button => {
+                button.addEventListener('click', async (e) => {
+                    editingProjectId = e.currentTarget.dataset.id;
+                    const doc = await projectsCollection.doc(editingProjectId).get();
+                    if (doc.exists) {
+                        const data = doc.data();
+                        document.getElementById('projectModalLabel').textContent = 'Edit Project';
+                        document.getElementById('projectIdHidden').value = editingProjectId;
+                        document.getElementById('projectTitle').value = data.title;
+                        document.getElementById('projectDescription').value = data.description;
+                        projectImageURLInput.value = data.imageURL || '';
+                        projectImageFileInput.value = '';
+                        projectImageFileInput.required = false;
+                        if (data.imageURL) {
+                            projectImagePreview.src = data.imageURL;
+                            projectImagePreviewContainer.style.display = 'block';
+                            removeProjectImageBtn.style.display = 'inline-block';
+                        } else {
+                            projectImagePreview.src = `https://placehold.co/150x150/EBF4FF/768390?text=Upload`;
+                            projectImagePreviewContainer.style.display = 'block';
+                            removeProjectImageBtn.style.display = 'none';
+                        }
+                        document.getElementById('projectTags').value = (data.tags || []).join(', ');
+                        document.getElementById('projectLink').value = data.link;
+                        projectModalInstance.show();
+                    }
+                });
+            });
+            document.querySelectorAll('.delete-project-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const projectIdToDelete = e.currentTarget.dataset.id;
+                    Swal.fire({
+                        title: 'Are you sure?', text: "You won't be able to revert this!", icon: 'warning',
+                        showCancelButton: true, confirmButtonColor: '#d33', cancelButtonColor: '#6c757d', confirmButtonText: 'Yes, delete it!'
+                    }).then(async (result) => {
+                        if (result.isConfirmed) {
+                            try {
+                                // Consider deleting image from storage here if it exists
+                                await projectsCollection.doc(projectIdToDelete).delete();
+                                Swal.fire('Deleted!', 'Your project has been deleted.', 'success');
+                                loadUserProjectsForDashboard();
+                            } catch (error) {
+                                Swal.fire('Error!', `Could not delete project: ${error.message}`, 'error');
+                            }
+                        }
+                    });
+                });
+            });
+        }
+
+        // --- Public Portfolios (Main Listing) ---
+        async function loadPublicPortfolios() {
+            showLoader(publicLoader);
+            publicPortfolioGrid.innerHTML = '';
+            noPublicResults.style.display = 'none';
+
+            try {
+                const usersSnapshot = await usersCollection.orderBy('name').get(); // Sort by name for consistency
+                const projectsSnapshot = await projectsCollection.orderBy('createdAt', 'desc').get();
+
+                allUsersCache = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                allProjectsCache = projectsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+                populateFilterDropdowns();
+                renderFilteredPublicPortfolios();
+            } catch (error) {
+                console.error("Error loading public data:", error);
+                publicPortfolioGrid.innerHTML = '<p class="text-danger text-center">Error loading portfolios.</p>';
+            } finally {
+                hideLoader(publicLoader);
+            }
+        }
+
+        function populateFilterDropdowns() {
+            const allSkills = new Set();
+            allProjectsCache.forEach(p => (p.tags || []).forEach(t => allSkills.add(t.trim())));
+            allUsersCache.forEach(u => (u.skills || []).forEach(s => allSkills.add(s.trim())));
+
+            skillFilterSelect.innerHTML = '<option value="">All Skills/Technologies</option>'; // Changed default text
+            Array.from(allSkills).sort().forEach(skill => {
+                if(skill) skillFilterSelect.innerHTML += `<option value="${escapeHtml(skill)}">${escapeHtml(skill)}</option>`;
+            });
+
+            vendorFilterSelect.innerHTML = '<option value="">All Vendors</option>'; // Changed default text
+            allUsersCache.forEach(user => {
+                vendorFilterSelect.innerHTML += `<option value="${escapeHtml(user.uid)}">${escapeHtml(user.name || user.email)}</option>`;
+            });
+        }
+
+        function renderFilteredPublicPortfolios() {
+            publicPortfolioGrid.innerHTML = '';
+            const keyword = keywordSearchInput.value.toLowerCase().trim();
+            const selectedSkill = skillFilterSelect.value;
+            const selectedVendorId = vendorFilterSelect.value;
+
+            let filteredUsers = allUsersCache;
+            if (selectedVendorId) {
+                filteredUsers = filteredUsers.filter(u => u.uid === selectedVendorId);
+            }
+
+            let displayCount = 0;
+            filteredUsers.forEach(user => {
+                let userProjects = allProjectsCache.filter(p => p.uid === user.uid);
+                let userMatchesFilters = true;
+
+                if (selectedSkill) {
+                    const userHasSkill = (user.skills || []).map(s=>s.trim()).includes(selectedSkill);
+                    let userHasProjectWithSkill = userProjects.some(p => (p.tags || []).map(t=>t.trim()).includes(selectedSkill));
+                    
+                    if (!userHasSkill && !userHasProjectWithSkill) {
+                        userMatchesFilters = false;
+                    }
+                    // If skill filter is active, only show projects with that skill on the card, but don't hide user if their profile has the skill
+                    if (userHasProjectWithSkill) { // If projects have skill, filter them
+                        userProjects = userProjects.filter(p => (p.tags || []).map(t=>t.trim()).includes(selectedSkill));
+                    } else if (!userHasSkill) { // If user profile also doesn't have skill, then no match
+                         userProjects = []; // No projects match
+                    } // else user profile has skill, show all their projects
+                }
+
+
+                if (keyword) {
+                    const userFieldsToSearch = [user.name, user.jobTitle, user.bio, (user.skills || []).join(' ')].join(' ').toLowerCase();
+                    let keywordMatch = userFieldsToSearch.includes(keyword);
+                    if (!keywordMatch) {
+                        keywordMatch = userProjects.some(p =>
+                            [p.title, p.description, (p.tags || []).join(' ')].join(' ').toLowerCase().includes(keyword)
+                        );
+                    }
+                    if (!keywordMatch) userMatchesFilters = false;
+                }
+
+                if (!userMatchesFilters) return;
+
+                displayCount++;
+                const userCard = document.createElement('div');
+                userCard.className = 'col';
+                let projectsHTML = `<p class="small text-muted mt-2 ${userProjects.length > 0 ? 'd-none' : ''}">No projects match filters or no projects added.</p>`;
+                if (userProjects.length > 0) {
+                    projectsHTML = '<div class="row row-cols-1 g-2 mt-2">'; // Smaller gap for project previews
+                    userProjects.slice(0, 2).forEach(p => {
+                        projectsHTML += `
+                            <div class="col">
+                                <div class="card card-sm shadow-sm">
+                                    <img src="${escapeHtml(p.imageURL || 'https://placehold.co/300x150/EBF4FF/768390?text=Project')}" class="card-img-top project-img" style="height:120px;" alt="${escapeHtml(p.title)}">
+                                    <div class="card-body p-2">
+                                        <h6 class="card-title small mb-1 text-truncate" style="font-size: 0.85rem;">${escapeHtml(p.title)}</h6>
+                                        <p class="card-text small mb-1" style="font-size: 0.75rem;">${formatTags(p.tags, 'bg-success', true)}</p>
+                                        <a href="${escapeHtml(p.link)}" target="_blank" class="btn btn-xs btn-outline-dark stretched-link" style="font-size: 0.7rem; padding: 0.1rem 0.4rem;">View</a>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    projectsHTML += '</div>';
+                }
+
+                userCard.innerHTML = `
+                    <div class="card h-100 shadow-hover">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <img src="${escapeHtml(user.photoURL || `https://placehold.co/60x60/EBF4FF/768390?text=${user.name ? user.name.charAt(0).toUpperCase() : 'V'}`)}" alt="${escapeHtml(user.name)}" class="profile-img-sm me-3" style="width:60px; height:60px;">
+                                <div>
+                                    <h5 class="card-title mb-0 fs-6 text-truncate">${escapeHtml(user.name || 'Unnamed Vendor')}</h5>
+                                    <p class="card-text text-muted small text-truncate">${escapeHtml(user.jobTitle || 'No job title')}</p>
+                                </div>
+                            </div>
+                            <p class="card-text small mb-1"><strong>Skills:</strong> ${formatTags(user.skills, 'bg-primary', true) || '<span class="small text-muted">Not specified</span>'}</p>
+                            <p class="card-text small text-muted" style="font-size: 0.8rem; height: 3.2em; overflow: hidden;">${escapeHtml((user.bio || 'No bio available.'))}</p>
+                            <h6 class="mt-3 small fw-bold">Featured Projects:</h6>
+                            ${projectsHTML}
+                        </div>
+                        <div class="card-footer bg-transparent text-center border-top-0 pt-0">
+                             <button class="btn btn-sm btn-info view-full-profile-btn btn-rounded" data-uid="${user.uid}">View Full Profile</button>
+                        </div>
+                    </div>
+                `;
+                publicPortfolioGrid.appendChild(userCard);
+            });
+
+            noPublicResults.style.display = (displayCount === 0) ? 'block' : 'none';
+            
+            document.querySelectorAll('.view-full-profile-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const userId = e.currentTarget.dataset.uid;
+                    // Change location to current page + query param
+                    location.href += `?userId=${userId}`;
+                });
+            });
+        }
+
+        keywordSearchInput.addEventListener('input', renderFilteredPublicPortfolios);
+        skillFilterSelect.addEventListener('change', renderFilteredPublicPortfolios);
+        vendorFilterSelect.addEventListener('change', renderFilteredPublicPortfolios);
+        clearFiltersBtn.addEventListener('click', () => {
+            keywordSearchInput.value = '';
+            skillFilterSelect.value = '';
+            vendorFilterSelect.value = '';
+            renderFilteredPublicPortfolios();
+        });
+
+        // --- Single Portfolio Display Logic (NEW) ---
+        async function displaySinglePortfolio(userId, authUserContext) { // authUserContext is the currently logged-in user, if any
+            showView('singlePortfolioDetailView');
+            showLoader(singlePortfolioProjectsLoader); // Use a specific loader for projects part
+            singleProfileDataContainer.innerHTML = '<div class="loader mx-auto"></div>'; // Loader for profile part
+            singlePortfolioProjectsGrid.innerHTML = '';
+            noSingleUserProjectsMessage.style.display = 'none';
+
+            try {
+                const userDoc = await usersCollection.doc(userId).get();
+                if (!userDoc.exists) {
+                    singleProfileDataContainer.innerHTML = '<p class="text-center text-danger fs-4">Portfolio not found.</p>';
+                    hideLoader(singlePortfolioProjectsLoader);
+                    return;
+                }
+                const userData = userDoc.data();
+
+                // Render Profile Details
+                let socialLinksHTML = '';
+                if (userData.socialLinks && userData.socialLinks.length > 0) {
+                    socialLinksHTML = userData.socialLinks.map(link => `
+                        <a href="${escapeHtml(link)}" target="_blank" class="btn btn-outline-light btn-sm me-2 mb-2" title="${escapeHtml(link)}">
+                            <i class="${getSocialIcon(link)} me-1"></i> ${escapeHtml(new URL(link).hostname.replace('www.',''))}
+                        </a>`).join('');
+                }
+
+                singleProfileDataContainer.innerHTML = `
+                    <div class="profile-header text-center">
+                        <img src="${escapeHtml(userData.photoURL || `https://placehold.co/150x150/FFFFFF/007BFF?text=${userData.name ? userData.name.charAt(0).toUpperCase() : 'U'}`)}" alt="${escapeHtml(userData.name)}" class="profile-img-lg">
+                        <h2 class="display-5 fw-bold">${escapeHtml(userData.name)}</h2>
+                        <p class="lead">${escapeHtml(userData.jobTitle || 'Profession not specified')}</p>
+                        ${userData.location ? `<p class="mb-2"><i class="fas fa-map-marker-alt me-1"></i> ${escapeHtml(userData.location)}</p>` : ''}
+                    </div>
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-body p-4">
+                            <h4 class="card-title text-primary mb-3">About Me</h4>
+                            <p class="text-muted" style="white-space: pre-wrap;">${escapeHtml(userData.bio || 'No biography provided.')}</p>
+                            
+                            <h5 class="text-primary mt-4 mb-2">Skills</h5>
+                            <p>${formatTags(userData.skills, 'bg-primary') || '<span class="text-muted">No skills listed.</span>'}</p>
+                            
+                            <h5 class="text-primary mt-4 mb-2">Languages</h5>
+                            <p>${formatTags(userData.languages, 'bg-secondary') || '<span class="text-muted">No languages listed.</span>'}</p>
+                            
+                            <h5 class="text-primary mt-4 mb-2">Contact</h5>
+                            <div class="contact-info">
+                                <p><i class="fas fa-envelope text-primary"></i> <a href="mailto:${escapeHtml(userData.contactEmail || userData.email)}">${escapeHtml(userData.contactEmail || userData.email)}</a></p>
+                                ${userData.contact?.whatsapp ? `<p><i class="fab fa-whatsapp text-success"></i> ${escapeHtml(userData.contact.whatsapp)}</p>` : ''}
+                                ${userData.contact?.telegram ? `<p><i class="fab fa-telegram text-info"></i> ${escapeHtml(userData.contact.telegram)}</p>` : ''}
+                            </div>
+
+                            ${userData.resumeURL ? `<a href="${escapeHtml(userData.resumeURL)}" target="_blank" class="btn btn-outline-primary mt-4 btn-rounded"><i class="fas fa-file-alt me-2"></i>View Resume</a>` : ''}
+                            
+                            ${socialLinksHTML ? `<h5 class="text-primary mt-4 mb-3">Connect</h5><div>${socialLinksHTML}</div>` : ''}
+                        </div>
+                    </div>
+                `;
+                singlePortfolioProjectsTitle.textContent = `${escapeHtml(userData.name)}'s Projects`;
+
+                // Fetch and Render Projects for this user
+                const projectsSnapshot = await projectsCollection.where('uid', '==', userId)
+                                                               .orderBy('createdAt', 'desc').get();
+                if (projectsSnapshot.empty) {
+                    noSingleUserProjectsMessage.style.display = 'block';
+                } else {
+                    projectsSnapshot.forEach(doc => {
+                        const project = { id: doc.id, ...doc.data() };
+                        const projectCard = `
+                            <div class="col">
+                                <div class="card h-100 shadow-hover">
+                                    <img src="${escapeHtml(project.imageURL || 'https://placehold.co/300x200/EBF4FF/768390?text=Project+Image')}" class="card-img-top project-img" alt="${escapeHtml(project.title)}">
+                                    <div class="card-body">
+                                        <h5 class="card-title text-truncate">${escapeHtml(project.title)}</h5>
+                                        <p class="card-text small text-muted" style="min-height: 60px;">${escapeHtml(project.description.substring(0, 120))}${project.description.length > 120 ? '...' : ''}</p>
+                                        <p class="card-text"><small class="text-muted"><strong>Technologies:</strong> ${formatTags(project.tags, 'bg-info', true)}</small></p>
+                                    </div>
+                                    <div class="card-footer bg-transparent border-0 text-center">
+                                        <a href="${escapeHtml(project.link)}" target="_blank" class="btn btn-primary btn-rounded"><i class="fas fa-external-link-alt me-2"></i>View Project</a>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        singlePortfolioProjectsGrid.innerHTML += projectCard;
+                    });
+                }
+            } catch (error) {
+                console.error("Error displaying single portfolio:", error);
+                singleProfileDataContainer.innerHTML = '<p class="text-center text-danger fs-4">Could not load this portfolio.</p>';
+            } finally {
+                hideLoader(singlePortfolioProjectsLoader);
+            }
+        }
+
+
+        // --- Analytics (Chart.js) ---
+        function updateDashboardAnalytics(userProjects) {
+            if (!Chart || !userProjects) {
+                analyticsSection.style.display = 'none';
+                noChartData.style.display = 'block';
+                if (techChartInstance) techChartInstance.destroy();
+                return;
+            }
+             if (userProjects.length === 0) {
+                analyticsSection.style.display = 'none';
+                noChartData.style.display = 'block';
+                if (techChartInstance) techChartInstance.destroy();
+                return;
+            }
+
+            const techCounts = {};
+            userProjects.forEach(project => {
+                (project.tags || []).forEach(tag => {
+                    techCounts[tag] = (techCounts[tag] || 0) + 1;
+                });
+            });
+
+            if (Object.keys(techCounts).length === 0) {
+                 noChartData.style.display = 'block';
+                 analyticsSection.style.display = 'none';
+                 if (techChartInstance) techChartInstance.destroy();
+                 return;
+            }
+            
+            noChartData.style.display = 'none';
+            analyticsSection.style.display = 'block';
+
+            const labels = Object.keys(techCounts);
+            const data = Object.values(techCounts);
+            const backgroundColors = [
+                'rgba(255, 99, 132, 0.8)', 'rgba(54, 162, 235, 0.8)',
+                'rgba(255, 206, 86, 0.8)', 'rgba(75, 192, 192, 0.8)',
+                'rgba(153, 102, 255, 0.8)', 'rgba(255, 159, 64, 0.8)',
+                'rgba(199, 199, 199, 0.8)', 'rgba(83, 102, 255, 0.8)',
+                'rgba(100, 255, 100, 0.8)', 'rgba(255, 100, 100, 0.8)' 
+            ];
+
+
+            if (techChartInstance) techChartInstance.destroy();
+
+            techChartInstance = new Chart(techChartCanvas, {
+                type: 'doughnut', // or 'pie'
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Projects per Technology',
+                        data: data,
+                        backgroundColor: labels.map((_, i) => backgroundColors[i % backgroundColors.length]),
+                        borderColor:  'rgba(255, 255, 255, 0.7)',
+                        borderWidth: 2,
+                        hoverOffset: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { 
+                        legend: { 
+                            position: 'top',
+                            labels: { padding: 15, font: {size: 13} }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed !== null) {
+                                        label += context.parsed + (context.parsed === 1 ? ' project' : ' projects');
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // --- Initial Load ---
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+        // The onAuthStateChanged listener will now handle the initial view logic,
+        // including checking for userId in URL.
+        // Call initializeView as a fallback if onAuthStateChanged hasn't fired yet or for edge cases.
+        // setTimeout(initializeView, 100); // Give onAuthStateChanged a moment to run first
+        // No, onAuthStateChanged should be the primary driver. If it finds a userId in URL, it will call displaySinglePortfolio.
+        // If not, it will proceed with auth logic.
+        // The only edge case is if the page loads with a userId and auth is slow.
+        // The current onAuthStateChanged structure handles this: it checks URL first.
+
+        // Ensure Firebase Auth is ready before deciding the initial view, especially for deep links.
+        const unsubscribe = auth.onAuthStateChanged(user => {
+            unsubscribe(); // Unsubscribe after first call to prevent multiple executions
+            initializeView(); // Now that auth state is known, initialize the correct view
+        });
+
+
+    </script>
+</body>
+</html>
