@@ -335,11 +335,12 @@
             document.querySelectorAll('.open-tool-btn').forEach(button => {
                 button.addEventListener('click', (e) => {
                     const toolName = e.target.dataset.name;
-                    // Construct the path with current search params for history
-                    const currentSearchParams = new URLSearchParams(window.location.search);
-                    currentSearchParams.set('name', toolName); // Ensure name is there or set
-                    history.pushState({ toolName: toolName }, toolName, `/?${currentSearchParams.toString()}`);
-                    handleRouteChange();
+                    // // Construct the path with current search params for history
+                    // const currentSearchParams = new URLSearchParams(window.location.search);
+                    // currentSearchParams.set('name', toolName); // Ensure name is there or set
+                    // history.pushState({ toolName: toolName }, toolName, `/?${currentSearchParams.toString()}`);
+                    // handleRouteChange();
+                    location.href += `?name=${encodeURIComponent(toolName)}`; // Directly set URL to open tool
                 });
             });
         }
