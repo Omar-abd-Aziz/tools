@@ -22,7 +22,7 @@ let AllToolsObject = [{
     ToolLink: "https://omar-abd-aziz.github.io/File-Uploaded-By-Elhalwany/",
 },
 {
-    ToolName: "مصفوفة الأولويات - Notes",
+    ToolName: "Notes-First-Things-first",
     ToolLink: "https://firebasestorage.googleapis.com/v0/b/pagebuilder-6d4aa.appspot.com/o/webpage_1748434381941.html?alt=media&token=bf88b128-1d88-4f9a-be5c-8fc1703a6624",
 },
 {
