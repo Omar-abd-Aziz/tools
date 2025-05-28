@@ -23,7 +23,7 @@ let AllToolsObject = [{
 },
 {
     ToolName: "مصفوفة الأولويات - Notes",
-    ToolLink: "https://firebasestorage.googleapis.com/v0/b/pagebuilder-6d4aa.appspot.com/o/webpage_1748371999793.html?alt=media&token=ded3f5e6-9217-423a-a533-e37e6442d7ca",
+    ToolLink: "https://firebasestorage.googleapis.com/v0/b/pagebuilder-6d4aa.appspot.com/o/webpage_1748434381941.html?alt=media&token=bf88b128-1d88-4f9a-be5c-8fc1703a6624",
 },
 {
     ToolName: "مصفوفة الأولويات - Dashboard",
